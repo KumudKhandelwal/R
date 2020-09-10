@@ -1,0 +1,144 @@
+****************
+SAMHDD 10-07-2020
+****************
+
+........................................................
+3. Clustering with mixture models (and the EM algorithm)
+........................................................
+It is possible to do clustering "based on statistical models". This allows to get a natural modelling of the data, a very flexible clustering framework and a sound way to select the number of groups.
+
+First, we define what is a mixture model:
+It is a statistical model with a probability density function (pdf) as follows
+	p(x) = (summation over k=1 to k) Piek * pk(x)		(piek = P(Y=k); pk(x) = P(X|Y=k))
+	where pk(x) is the conditional pdf of the kth component and the piek is the prior probability of the component
+This model is very flexible because we can use any parameter or non-parametric density for pk(x).
+e.g. pk(x) = N(x;muk,SIGMAk) or U[x;0,1] or P(x;lambdak)
+
+For instance, for continuous data, we may use such a mixture model:
+p(x) = 0.2*N(x;mu,SIGMA) + 0.5*T(x;theta) + 0.3*U[0,1]		(where N is Gaussian, U is Uniform, and T is student distribution)
+For instance for a discrete data like count date:
+p(x) = 0.6 P(x;2) + 0.4 P(x;4)		(where P is the Poisson distribution)
+For binary:
+p(x) = 0.4 B(x;0.2) + 0.6 B(x;0.5)	(where B is the Bernoulli distribution)
+
+Depending upon the type of model, we may have different mixture models.
+
+Remark 1:
+---------
+It is usuallly easier (from the computational point of view) to choose pdfs of the same family.
+
+p(x) = (summation over k=1 to k) piek * N(x; muk, SIGMAk)
+(Here the Gaussian distribution is fixed (i.e. pdf is fixed) and the parameters are the varying)
+-> This specific model is called the "GAUSSIAN MIXTURE MODEL" (GMM) and it probably the most popular mixture model for contiuous data.
+-> Doing this makes the computation very easy (no mixture of different models, but same model).
+-> For a data set which is not Gaussian, we can cluster the data sets into multiple groups (k=5 or 6 say with a mean and variance) and then treat all these individuals as a Gaussian distribution.
+
+
+Remark 2:
+---------
+Even though the mixture model is not restricted to clustering, it is of course very helpful to recover a hidden clustering partition from a data set. For this, we will have to use
+a specific influence algorithm called the EM (Expectation-Maximization) algorithm.
+-> ER is used to fit a mixture model in the case where we do not know the clusters in advance.
+																						  
+
+How the EM algorithm works?
+Initialization: a random assignment of observations to cluster Y^(0) AND a random value for the mixture parameter Theta^(0) (in the GMM, pie1(0)...piek(0), mu1^(0)...muk^(0), sigma1^(0)...sigmak^(0))
+
+Loop:
+	E step:
+	We mainly compute the posterior probability of Y knowing X and for theta^(q): (t at ik) = P(Y=k | X=xi;theta^(q))
+	M step:
+	We maximize the expectation of the complete log-likelihood to get a new estimate of theta (theta^(q+1))
+Stop: with a plateau of the log-likelihood
+
+Theorem: the EM algorithm generates a series of theta^(q) that converges towards a (local) maximum of the likelihood (at least local, if not global).
+
+=> The EM algorithm is sensitive to the initialization and a correct way to avoid being trapped in local maximum is to perform multiple initializations.
+
+
+At the end of the EM algorithm, we get:
+- the fitted model (theta hat)
+- a clustering thanks to the (t at ik) values
+
+
++ The MM is extremely flexible and can handle any type of data.
++ The model parameters are very helpful to understand the different groups.
++ The process is totally automative thanks to EM and model selection.
++ The output of EM provides information about the classification risk, in addition to the clustering.
+- GMM are not well adapted to HD spaces (a solution HDDC)
+
+
+At the end, not only do we have the R clustering, but also the posterior probabilities. So, if the problem is senitive, we may look at the probability of error.
+
+-----------------------------
+The curse of dimensionality:
+-----------------------------
+
+Classical ways to avoid the curse of dimensionality:
+	1. Dimension reduction (reduce dimension p which is too large to a dimension d much lesser than it --> d <<< p)
+	2. Regularization (example - estimation of parameters in a distribution)
+	3. Parsimonious models (example - GMM where we fixed few gaussian parameters and every time estimate for only mu)
+
+
+
+Dimension Reduction:
+!! Wrong belief that it helps for classification. Instead, you may lose very useful information which is discriminative in nature.
+(i.e. Performing the dimensionality reduction can be counter-constructive for clustering or classification of data.)
+
+-----------------------------
+PCA: principal Component Analysis
+The idea of PCA is to find a subspace by a few dimension such that the projected variance is maximized.
+
+
+	Max	transpose(U) SIGMA U
+	 u
+
+<=> transpose(U) (XtX) U when X are centered matrices
+
+Theorem:
+The first PC axis is the eigen vector associated to the largest eigen value of XtX.
+
+Algorithm:
+ - COmpute SIGMA hat = XtX
+ - Eigen Value secomposition of SIGMA hat
+ - You keep the d eigen vector associated with the largest eigen value
+ 
+=> The most difficult task is to find the right number of dimensions to retain.
+1. The rule of 90%
+	select d such that (SIGMA j=1 to d lambdaj)/(SIGMA j=1 to p lambdaj) >=90%
+	where lambdaj is the jth largest eigen value of SIGMA hat
+	
+2. The rule of the eigen value scree
+	plot the eigen values (Xj) against dimension d and select d where you can observe a knee like structure (someone stiing on his knees)
+		^
+	Xj	.
+		.
+		...
+		. .
+		. .
+		. ...							We pick d=4 for this problem
+		. . .
+		. . .
+		. . ...
+		. . . .
+		. . . ...
+		. . . . .....
+		. . . . . . .....
+		. . . . . . . . ..............
+		. . . . . . . . . . . . . . . . . .> d
+		0 1 2 3 4 5 6
+	
+3. The scree test of Cattell
+
+
+PPCA:
+	Do classification (clustering) and dimension reduction simultaneously.
+	MPPCA: The idea is to perform a group-specific PCA at each iteration while clustering with the EM algorithm.
+	
+	
+HDDC:
+
++ It is a GMM and it inherits all the advantages of GMMs.
++ The choice of K and threshold (torque) is handled with model selection.
++ designed for high dimensional spaces
+- very difficult to visualize the various clusters due to the fact that we project the data in different sub-spaces.

@@ -1,0 +1,342 @@
+*********************************************************
+Statistical Analysis of Massive and High Dimensional Data 
+*********************************************************
+09-07-2020
+
+*****************************
+Support Vector Machine (SVM):
+*****************************
+-> Classification method
+-> Complexifies the problem by increasing the dimensions
+	Idea: to project the data (using some non-linear projector) into a high-dimensional space in order to ease the classification task and to use a linear classifier in the projection space (also called feature space). The kernel trick allows to perform all calculations from the data. Though the process is hard but end result is satisfactory.
+
+^						^
+.						.
+.  x	o o 			.  x		o o  
+. x  x  o	o			. x x		o  o
+.  x x    x  o		=>	. x x x	     o
+. xx  x  o				. x x x		o
+.  x  o o   o			.   x	   o o o	
+.		  o				.			o
+.................>		...................>
+
+=> The projection here is not a problem even if we are moving from low dimension to some high dimension as it will ease the computation process.
+
+Steps:
+1. SVM projects the original data X (belongs to E) to some other space of high dimensionality, say phi(X) (belongs to F), thanks to a non-linear operator phi() such that the classification problem can be solved in F with a linear boundary.
+2. Among all the possible linear planes that correctly separate the classes, we will pick the one which is the most far away from all observations (in F). We come up with a margin (distance between the first closest observation on either side of the boundary) and look for the linear separators within this margin range.
+	=> The optimal linear hyper plane in this sense is the one which maximizes the margin between the hyperplane and the closest observations.
+	=> The observations which define the margin are called the support vectors.
+
+^		.	.
+.		.	.
+.  x	.	. o o			The space between the two vertical lines (boundaries) define the marginal range and the observations
+. x x	.	.  o  o			on these boundaries are called space vectors.
+. x x x	.   . o
+. x x  x.	.	o
+.   x	.   .o o o
+.		.	. o
+.................>
+
+In summary, the objective of SVM can be defined in following 2 steps:
+	Step 1 - Learning Step: Find phi and the best separator.
+	Step 2 - Classification step: For a new observation x*, compute phi(x*) and see on which side of the separator it is located at.
+
+In practice, the search for the optimal linear separator reduces to the maximization of a specific distance:
+	max || phi(xtilda1) - phi(xtilda2) ||^2		(1)
+		where xtildac is the support vector for class C
+So, this procedure is a bit complicated and complex to solve and separate the classes properly.
+-> We may hence use the "kernel trick" to solve the optimization problem directly from the original space E. (How to optimize into the feature space directly from the observed data points without the use of phi operator or function)
+
+...........................
+Definition of kernel-trick:
+...........................
+a kernel K associated to a function phi is given as
+	K(x,y) = <phi(x), phi(y)>   i.e. dot product of phi(x) and phi(y)
+	
+We can rewrite the eq (1) with K as:
+	max || phi(xtilda1) - phi(xtilda2) ||^2		<=>		< phi(xtilda1) - phi(xtilda2), phi(xtilda1) - phi(xtilda2) >
+or <phi(xtilda1), phi(xtilda1)> + < phi(xtilda2), phi(xtilda2) > - 2< phi(xtilda1), phi(xtilda2) >
+or as per the definition of K,
+	K(xtilda1, xtilda1) + K(xtilda2, xtilda2) - 2K(xtilda1, xtilda2)
+i.e. a function which takes 2 arguments in comparision to SVM which just takes one, thus computation becomes easy.
+
+Thanks to the kernel trick, the 1st step of SVM becomes now: Search for a kernel K(x,y) instead of looking for phi(x)
+In practice, it is possible to pick a kernel in the "catalog" of kernels:
+	linear - 		K(x,y) = transpose(x) * y
+	polynomial - 	(K at p)(x,y) = (transpose(x) * y)^p
+					where p is the dimension of the problem space which is a parameter to be tuned
+	RBF kernel: 	K at sigma(x,y) = exp(-1/2 * transpose(x) * y)/(2 sigma^2)
+
+Summary:
+Pros and Cons of SVM:
++ a smart method that exploits HD spaces to solve the complex situations.
++ SVM can reach high performaces (when right kernel and right linear operator phi are tuned correctly)
+- finding the right kernel and the right hyper-parameter may be long (you may need to use CV)
+- SVM has a complexity which depends upon 'n' (n: size of the data or number of samples - observations)
+With a million data, learing with SVM can take several hours to several days depending upon the problem.
+
+=> In R, use the function svm() in the e1071 package or function svmRadial() in caret package
+=> In practice, we need to test for all the kernels with CV to see if the separation is better or not. Because we are working in spaces with very high dimension, it is not possible to look into the projection and the only way is to test for performace.
+=> In reality, you never see the projection, you know that there is an imaginary projection which can not be seen and the only thing that can be solved is the CV error for different kernels available. The kernel with the least error wins and will be considered for separation of classes.
+=> In case of linear regression and logistic regression, if n < p, then there is a problem because computation of covariance matrix (X-transpose * X) may not be of full rank and inverting this matrix will be a problem because we can not divide the matrix by a determinant which is zero here.
+=> In SVM, there is no matrix computation involved, so n < p is not a problem here. So, no technical problem but computational problem with less data for learning and validation procedures.
+
+
+
+
+
+A quick summary on Deep Neural Network:
+We have a data set 'x' and we apply a non-linear transfomation 'f1' on this followed by another non-linear transformation 'f2' and so on until we find the optimal data set 'y'. 
+initial data set X : transformations f1 -> f2 -> ..... -> Fj to yield y
+
+-> f is highly parameterized
+example: Let phi be a non-linear activator (or operator function)
+	f1(X) = phi(beta1-transpose * X)
+	f2(X) = phi(beta2-transpose * f1(X)) = phi(beta2-transpose * phi(beta1-transpose * X))
+	.
+	.
+	.
+	fj = phi((beta_j)-transpose * phi((beta_j-1)-transpose * phi(....)))
+	
+	Here we have matrix inside a matrix and hence a lot of parameters to be tuned or optimized.
+In deep learning, the parameters to be tuned are the choice for the operator function phi() and the form of betaj (which could be anything a matrix, array, or something else).
+
+=> You need a high GPU to do the computations as it may take a lot of computation time.
+ 
+=====================
+UNSUPERVISED LEARNING
+=====================
+It can be split into two main parts:
+	->	Clustering (also called unsupervised classification)
+		summarize a data set with a lot of observations (n -> large)
+	->	Dimensionality Reduction
+		summarize a data set with a lot of variables (p -> large)
+
+** In most cases, you will have to use both (i.e. if both the observations(n) and the variables/dimension(p) are large enough and can not be computed independently. e.g. n=1 million, p=100)
+
+     p
+.............
+.           .
+.			.
+.			.   n
+.			.
+.			.
+.............
+
+
+***********
+CLUSTERING:
+***********
+The goal of clustering is to gather a large number of observations (n -> large) into a small number (k <<< n) of homogeneous groups such that
+	- data in the same group are similar
+	- data in different groups are different
+The process seems easy and naive but is a very complicated  one to implement.
+
+
+Example: 3 bags B1, B2, B3 and 12 balls with different features, say colors (2 green>>yellow, 1 blue>>green, 3 red>>yellow=green, 2 green>>blue, 2 yellow-green, 2 white-red)
+Putting them in bags on what criteria? It is very difficult - a complex task. => Which ball to keep in same bad and which one in different?
+
+We clearly understand that testing all the assignments of the balls to the bags is not easy and is a combinatorial problem and is infeasible when n is very large.
+This is why we need automatic techniques that approximate the best partitions.
+
+=== Applications of clustering ===
+	- Marketing: Segmentation of products and clients - Find certain number of groups of clients which look for similar products and classify them 	based on their preferences
+	- Medicine: Segmentation of medicines and patients - Classify patients who behave similar under the influence of a particular medicine
+	- Biology: Identifying people with same blood groups or some other similar trait (say same height or weight, etc.)
+	- Astrology
+	- Astrophysics
+	- Oceanology (Submarine classification)
+	and many other such fields.
+	
+=== Mathematical definition of Clustering ===
+We may use the definition of variance to create an objective clustering function:
+	Total variance: the standard variance
+		S = 1/n * (summation over i = 1 to n)(xi - x bar)^2
+	
+	Within variance: the average(or mean) of the variances of all the groups
+		W = 1/n * (summation of k=1 to K) nk Sk where Sk is the total variance within the group (or class) k
+	
+	Between variance: the variance of the means of all the groups
+		B = 1/n * (summation over k=1 to K) nk*(xk bar - x bar)^2 where 'xk bar' is the mean of group k
+
+When we speak of groups or clusters, we can define the above 3 variances.
+
+So, a good partition of clustering should maximize the criterion B/W
+	g(k) = B/W  or proportional to B/S because S=W+B and the good part is that S is a fixed quantity.
+
+The criterion can be used for :
+1. Comparing two partitions provided by different methods => If for same k, method 1 provides g(k)=0.4 and method 2 provides g(k)=0.65, then the method 2 with higher value of g(k) wins the partitioning game.
+2. Choosing the right value of k for a data set
+
+............................
+The hierarchical clustering:
+............................
+It not only provides a single partitiion but a hierarchy of partitiions which makes it very intuitive and meaningful method.
+
+Algorithm:
+----------
+Initilization: Associate each observations to a specific group
+1. For i from 1 to n
+	1. Compute the distances between all groups
+	2. Gather or collect the two groups that are the closest
+2. Stop when there is only one group left at the end
+
+This algorithm is quite complex because
+	- there are 'n' iterations to do => O(n)
+	- at each iteration, we need to compute the distances between all the groups (n(n-1) distances if total of n groups) => O(n^2)
+	So, the total complexity is O(n^3).
+
+=> Impossible to use this algorithm for more than 5000 observations.
+
+Distance between groups:
+1. Single Linkage: look for the minimum possible distance between an element from first group and an element from second group
+	d(A,B) = min {d(a,b) such that each a belongs to group A and each b belongs to group B}
+	
+	CONS:
+	- computationally expensive (high complexity) as the distance between all the possible combinations of elements from both the groups need to be calculated and we have to repeat this procedure n times for all the groups.
+	- the complexity increases from O(n^3) to O(n^4)
+	PROS:
+	+ the only clustering method able to detect clusters that are not spherical
+	
+2. Complete linkage: look for the maximum possible distance between an element from first group and an element from second group
+	d(A,B) = max {d(a,b) such that each a belongs to group A and each b belongs to group B}
+	
+	CONS:
+	- computationally very expensive (high complexity)
+	- very sensitive to outliers
+	PROS:
+	+ allows to detect spherical clusters
+
+3. The distance between mean (or centroid) of two groups
+	d(A,B) = d(a bar, b bar)
+	
+	CONS:
+	- It may be sensitive to outliers
+	PROS:
+	+ not expensive
+	+ able to form spherical groups
+	
+4. The ward distance
+	d(A,B) = d(a bar, b bar)/ (1/nA + 1/nB)
+	Group C is equidistant to the centroid of groups A and B. C will be clustered with the group that is large in size.
+	
+	CONS:
+	PROS:
+	+ It takes into account the natural tendency to go towards large groups
+	+ It forms spherical groups of different sizes
+
+The hierarchy of partitiions which is produced can be represented by a dendogram. From the dendogram, it is easy to extract a specific partition with k groups by cutting the tree at the level k.
+e.g. if a partition has n groups and you see that the largest clusters formed are at a level with k large groups(i.e. where g(k) - g(k-1) is large), cut the tree there and assign k. => We select k which is the largest value such that there is no significant change or improvement in g(k) (g(k = B/W))
+This technique of finding k can also be extended to other clustering methods too. 
+
+g(k)^
+	.
+   1..........................
+	.	      x x x x x x 
+	.	    x	
+	.     x	.
+	.       .							we choose k=4 as after that there is not much improvement in the value for g(k)
+	.   x   .
+	.       .
+	.       .
+   0..x........................> k
+	  1 2 3 4 5 6 7 8 9
+
+In softwares such as R, the dendograms display both the hierarchy of partitions and the evaluation of g(k)
+In R, this technique is available as hclust under the library "class" 
+In R, this technique does not work on the original data but on the matrix of distances between all the observations
+
+PROS:
++ It is very simple and intuitive method thanks to the dendograms.
++ Thanks to the distances between groups, this method may adapt to different situations.
+CONS:
+- Its complexity may be too large for some modern problems (e.g. O(n^2*log(n)))
+
+
+Sometimes, what most of the people do is to apply other clustering methods like K-means to boil down the data samples (observations) from 1 million to say 10k and then apply the hierarchical clustering on top of that to properly define the clusters. 
+
+.......................
+The K-means clustering:
+.......................
+Introduced in 1965, K-means is probably the most popular clustering because of its simplicity and efficiency.
+A reference technique
+Algorithm:
+----------
+Initilization: Choose K centers
+1. For i from 1 to n
+	1. Compute the distances between all the observations and the K centers
+	2. Assign each observation to the center which is the closest one
+	3. Recompute the center of the group
+2. Stop until no more change is observed in all the groups.
+
+PROS:
++ Simple, fast
++ low complexity
++ At the end, the centers of the groups may be viewed as the "average guy" of the group
+CONS:
+- we have to provide k => the solution is to use the criterion g(k)
+- sensitive to the initialization
+	(usually in practice, we loop over with multiple initializations to find the best value of k)
+
+In R, this technique is available as kmeans() under the library "class" 
+
+*******************
+Implemenation in R:
+*******************
+library(class)
+?kmeans
+
+Let us consider the 'swiss' data for illustrating the use of kmeans.
+data(swiss)
+
+out = kmeans(swiss, centers = 3)
+
+// we can provide either the number of clusters or the groups with number of particles
+
+Observations:
+1. Size of each group
+2. Cluster means
+3. Clustering vector
+4. Within cluster sum of squares by cluster: criterian g(k) ~ 81.8%
+
+A simple way to look at the clustering:
+pairs(swiss, col=out$cluster, pch=19)
+
+Of course, at first it is usually necessary to compute the K using a for loop
+
+J = c()
+for (k in 1:15){
+	out = kmeans(swiss, centers = k, nstart = 10)
+	J[k] = out$betweenss / out$totss
+}
+
+
+
+
+## The hierarchical clustering
+library(class)
+?hclust
+
+D = dist(swiss)
+out = hclust(D, method = 'complete')
+out
+
+to look at the result, we need to plot the dendrogram
+plot(out)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

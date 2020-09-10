@@ -1,0 +1,228 @@
+*********************************************************
+Statistical Analysis of Massive and High Dimensional Data
+*********************************************************
+03-07-2020:
+
+
+# Now let's try the learning model with 6 variables in complex model
+
+
+X = as.data.frame(x + x^2 + x^3 + x^4 + x^5 + x^6)
+
+train = sample(1:100, 75)
+
+f6 = lm(y ~ ., data = X, subset = train)
+
+# Predict for some data (here the learning data)
+xVal = x[-train]
+yhat = predict(f6, newdata=xVal)
+ErrV = sum((y[-train] - yhat)^2) / length(yhat)
+ErrV
+
+## The overfitting effect
+
+So, we are going to explore models ranging from very simple to very complex ones:
+
+
+x = runif(100,0,10)
+
+
+
+X = as.data.frame(x)
+ErrL = ErrV = rep(NA,20)
+for (c in 1:20){
+	X = as.data.frame(X, x^c)
+	f = lm(y ~ ., data = X)
+	yhat = predict(f, newdata=X)
+	ErrL[c] = sum((y - yhat)^2) / length(yhat)
+	
+	
+	train = sample(1:100, 75)
+	f2 = lm(y ~ ,, data = X, subset = train)
+	xval = as.data.frame(X[-train])
+	yhat = predict(f2, newdata = xval)
+	ErrV[c] = sum((y[-train] - yhat)^2) / length(yhat)
+}
+
+plot(ErrL, type='b')
+lines(ErrV, type='b', col='red')
+
+
+# This will 
+which.min(ErrL)
+which.min(ErrV)
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+Classification Methods:
+~~~~~~~~~~~~~~~~~~~~~~~
+...........................
+K-Nearest Neighbors (KNN)
+..........................
+
+For each x*,
+-> find in X the k neighbors of x* (we generally use Euclidean distance to find the neighbors)
+-> count the numberof neighbors in each class
+-> assign x* to the class which is the most represented within the neighbors
+-> For good results, take k=2n+1 (odd values) for n=0,1,....
+
+Pros and Cons:
++ Simple
+- the complexity can be large if N is large
+- the choice of k (usually thanks to CV) is sensitive
+
+* In R, use knn() in class package or knn3 in caret package
+
+.....................
+Logistic Regression:
+.....................
+-> It turn the classification method into a linear regression one with thne help of logistic function
+-> The logistic regression is based on the linear model for regression and the logistic function transforms the regression problem in a classification one.
+
+log(P(Y=1|X)/P(Y=0|X)) = beta-not + beta-transpose * X + epsilon
+where epsilon ~ N(0,sigma^2)
+
+The LHS is the logistic part and the RHS is the linear regression model. We need to classify the observations based on the result from this equation - whether to assign an individual to class 1 or class 2.
+
+-> Involves 2 steps: Learning step and Classification step
+The learning step estimates beta hat from the data by maximum likelihood using an optimization technique over the learned data.
+The classification step computes the new probabaility.
+	P(Y=1|X=x*) = p*
+	=> log(p*/(1-p*)) = beta-not + beta-transpose * X + epsilon
+	=> p*/(1-p*) = exp(RHS)
+	=> p* = exp(RHS) * (1-p*)
+	=> p* = exp(RHS)/ (1 + exp(RHS))
+	(exp(RHS) = exp(beta-not + beta-transpose * X + epsilon))
+	
+	if p* > 0.5, y* = 1
+	if p* <= 0.5, y* = 0
+
+Pros and Cons:
++ very efficient for most of the situations. Infact it is a reference method (when you do some project, you have to test this method before going into deep learning techniques). Sometimes the problem is too simple to be solved that you do not need to deep dive into machine learning. Most of the AI companies are going with this approach. First perform and compare various reference methods, if it is giving good results, then go ahead with the other models (deep learning, etc.) to improvise on the results obtained. Sometimes for large data sets, in deep learning, you get better results (96-97% performance) may be in 2 days whereas you get the gist of solution with logistic approach in 15 mins (95% performance).. That is why it is recommended to use this technique before moving to machine learing/ deep learning).
++ like for lm(), you can interpret the coefficients to see which variables are useful
++ no tuning parameter is required (the threshold is fixed at 0.5 - below is one class, upper is another class)
+- like lm(), logistic regression is sensitive to high dimensions.
+- limited to binary classification of data (supports max 2 classes of variables - good/bad, small/large, left/right, etc.)
+
+* In R, use glm() in the base package
+
+...................................
+Linear Discriminant Analysis (LDA): formalized by Fisher in 1936
+...................................
+-> Like Logistic Regression, it is also a reference method.
+-> A generative classification method (as most of the "xxDA" methods)
+-> designed over the statistical models - an extension to them
+-> Designed for multi-class classification : 2 or more classes
+
+Use KNN if single class
+Use LR if the problem has only binary(2) classes
+Use LDA if the problem has binary(2) or more classes
+
+-> The idea behind LDA is that each class can be modeled with a Gaussian distribution.
+	P(X|Y=c) = N(x; mu at c, SIGMA) for c=1,2,....C
+	where N represents the gaussian distribution, x is the number of observations, mu at c is the mean of the class c and SIGMA is the common covariance matrix shared by all the classes
+
+Constraint/ Assumption: All the classes must use the same covariance matrix.
+
+2 Step learning procedure:
+Step 1: Learn: Estimation of all parameters (mu1, mu2,... SIGMA, pi1, pi2, ...) by maximum likelihood
+				mu1, mu2, ... are the mean of each class c
+				pi1, pi2, ... are the probabilities of observing Y for each class c => (pi at c) = P(Y=c)
+Step 2: Classification: To predict and compute
+		P(Y=c|X=x*) for c = 1,2,...,C i.e. for all the classes
+		and assign x* to the class which has highest probabaility
+
+In R, use lda() function in the mass package to implement the LDA.
+
+Pros and Cons:
++ It has a model which is easy to understand.
++ We have probabilities as output: Risk calculation becomes easy.
++ It is also reference method: good upto 50 variables and works well for any dimension.
++ No parameters to tune.
+- Does not perform well in very high dimension (no. of variables or no. of columns in the dataset p>50).
+
+Quadratic DA vs Linear DA:
+=> same common structure except for that in QDA each class has its own covariance matrix instead of a common one.
+	QDA: P(X|Y=c) = N(x; mu at c, SIGMA at c) for c=1,2,....C
+=> The main difference between QDA and LDA is the nature of the boundary that separates the groups or classes. It is a straight line for LDA and a C curve for QDA.
+
+# Implementation of KNN in R:
+
+library(MBCbook)
+load(wine27) #178 different wines
+
+N = nrow(wine27)
+X = wine27[,1:27]
+Y = wine27$Type
+train = sample(1:N, 150)	# we have taken 150 samples for learning/training and rest 28 samples will be used for testing/validation
+
+# use knn to classify
+library(class)	# after we load the class library, we will have access to knn and other classification methods
+out = knn(X[train], X[-train], Y[train], k=3)
+
+# Error calculation
+sum(out != Y[-train]) / length(out)
+
+
+
+# Let's try now the LOO-CV to get a better result estimate of the error of KNN on these data:
+ErrCV = rep(NA, N)
+# Estimation of the error with LOO-CV
+for (i in 1:nrow(X)){
+	# Split between train and validation
+	train = seq(1,nrow(X))[-i]
+	# Learning step
+	out = knn(X[train,], X[-train,], Y[train], k=3)
+
+	# compute the error
+	ErrCV[i] = sum(out != Y[-train]) / length(out)
+}
+
+mean(ErrCV)
+
+We can observe that the 3-NN produces an avergae classification error around 20% which is not very satisfying. A way to improve it is to test other values of k and to use CV for pick the most appropriate k for those data.
+
+ErrCV = matrix(NA,N,25)
+
+for (k in 1:25){
+for(i in 1:nrow(X)){
+# Split between train and validation
+	train = seq(1,nrow(X))[-i]
+	# Learning step
+	out = knn(X[train,], X[-train,], Y[train], k=k)
+
+	# compute the error
+	ErrCV[i, k] = sum(out != Y[-train]) / length(out)
+}
+}
+plot(colMeans(ErrCV), type='b')
+which.min(colMeans(ErrCV))
+# boxplot(ErrCV)
+
+It turns out that the best solution that we can have with KNN is with k=9.
+
+=> Let us now use LDA to classify the same data.
+
+N = nrow(wine27)
+X = wine27
+Y = win27$Type
+train = sample(1:N,150)
+
+# LDA learning step
+f = lda(x[train,],Y[train])
+
+# LDA prediction step
+yhat = predict(clf, X[-train])
+
+# Validation Error
+sum(yhat != yhat$????) / length(yhat)
+# sum(yhat$class != Y[-train]) / length(yhat$class)
+
+> Note: the estimated classifier 'f' contains the maximum likelihood estimates for model parameters (f$prior = pi, f$means = mu, f$scaling = sigma)
+
+
+
+
+
+
+

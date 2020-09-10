@@ -1,0 +1,27 @@
+*************************************
+SAMHDD - Support Session (09-07-2020)
+*************************************
+
+Pre-processing (or pre-treatment) of data before optimizing the data
+- Cleaning the data
+	o removing missing values - Find places where no data is available and replace all of them with a same value. This process is called Imputation.
+		A very common way is to use mean/ median/ mode for the variable and replace the missing data with it (You need to do it for all the variables in your data set)
+	EM algorithm - assumes that the actual value is some RV that we can not observe and there is some statistical model to revcover the missing values. The approach is to use values from other available data set. WE can use missDA package in R to implement the same.
+	o abnormal data - any data which is not in accordance to or does not share the similar pattern as other data for a variable. e.g. negative age si something abnormal.
+	 - Tiring process as you need to create rules for each variable and verify that the values that you have are ok or not (check for abnormality). If not, consider them as if they are missing values and replace with imputation method.
+	 - can take several hours to setup rules if the dimension is too high.
+- Normalization of data - For data which have a bizarre value (something not abnormal but with high deviation in range of values) than others. So, we need to center and scale the data. It is try and find process. You need to check for the correct center and scale.
+	In R,
+		scale(X, scale=FALSE, center=FALSE) - no center, no scale
+		scale(X, scale=TRUE, center=FALSE)	- scale but no center
+		scale(X, scale=FALSE, center=TRUE)	- no scale but center
+		scale(X, scale=TRUE, center=TRUE)	- both scale and center
+		
+		
+
+For 2 or more hyper parameters to tune, we should consider all possible combinations of them.
+f(X, k, s) and k={1,2,..,10} and s={0.01,0.02,...,0.1}
+In R, we can compute the combinatorial values using expand.grid() function
+	prms = expand.grid(k,s) => will generate a data frame with all possible combinatorial values of k and s.
+	
+And then instead of doing computation in for loop, we will check for which row out of prms has the optimal pair of k and s to be used for computation in our problem.

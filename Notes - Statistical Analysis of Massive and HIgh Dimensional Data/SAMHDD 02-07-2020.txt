@@ -1,0 +1,396 @@
+*********************************************************
+Statistical Analysis of Massive and High Dimensional Data
+*********************************************************
+02-07-2020
+
+Artificial Intelligence is a strategic field of research: 
+	with direct application in most scientific fields (Medicine, Biology, Astrophysics, Humanities)
+	and with probably the most impact in innovation and transfer (health, transport, defense)
+
+Open problems of AI:
+- reliability of models and algorithms
+- handling data heterogeneity (categorical, functional, networks, images, texts, speeches, etc.)
+	(functional data are used in case of high dimensions)
+- unsupervised learning (clustering, dimension reduction)
+- learning from high dimension and small data (n small/ p large(n,p representing the data and the dimension, respectively))
+
+Data Analysis Process:
+1) Data Gathering:  (the data is either made available to us or we create it on our own)
+2) Pre-treatment of data: extract some useful data from original data and filter out missing values, abnormal values, extreme values (also called outliers), and any such data. => We MODIFY the data
+	(keeping extreme values in the data set to work upon may lead to some problems as these values are sensitive to the TRUE values)
+3) Data Learning process:
+	o describe satistics to discover the data
+	o unsupervised learning to discover knowledge about good data
+	o supervised learning to try to predict some	variable
+	o evaluate the performance (!IMP step)
+4) Reporting and Presentation of the research work done in previous steps
+
+Different Types of Data:
+	o Quantitative (Continuous): belongs to R(Real numbers), some power of R, N(Natural numbers), Z(Complex numbers), etc.
+	o Categorical data: (very commonly and well used in some fields like marketing, medicine, etc.)
+		classes or groups: {1,2,3,1,2,1} - no relationship between any of the element
+		ordinal data: {1,2,3,4,5} we need the pattern (what is larger, what is smaller. But the distance between them is not defined)
+			(you have the order of ranking, but the distance between these rankings is not defined - how much is 4 stars equivalent to...)
+			(example: we put the 5 star ratings on various applications, we know that one star is equivalent to 1, two to 2, and likewise, but what is not known is how the distance between these stars is measured)
+		ranking data: {1,2,3,5,4,2,2} 1 is better than 2 and 2 is better than 3, but there is no distance between any element
+	
+	o Functional data - a function, say f(t), or its graphical representation (time 't' on x-axis and functional change on y-axis)
+	o Network data - cluster of networks
+	o Image data - can be represented as a vector of data (xij = [0.23345]^3)
+	o Text data - how many times different words appear in some text (W1 2 times, W2 5 times, W3 1 time, W4 1 time, .....)
+	(Functional data, Image data, Text/ Word data can be seen as HIGH DIMENSIONAL data)
+
+Numerical Indicators (Let us consider simply quantitative or categorical data)
+	(HAS TO BE PERFORMED for each variable present in our dataset. e.g. if 24 variables are present, we may need to compute the mean 24 times - once for each varibale)
+		Central Tendency										Spread of the data (around the central tendency)
+	mean (who is the average guy of our data)				Variance		
+		+ formula known, computation is easy				Range: min - max					
+		- sensitive to outliers(extreme values)				Inter-quartile distance
+		+ very popularly known amongst people
+	median (50-50 division of data)
+		- no formula, computation could be long
+			and complicated (e.g. sorting of large data)
+		+ not sensitive to outliers
+	mode
+		+ easy to compute
+		+/- not necessarily unique
+
+	(NOTE: In R, the summary function will produce the indicators for all the variables at once)
+	
+Graphical Tools or representation of data:
+1. Continuous Data
+	Histogram - nice representation but could be very dangerous if you do not know the right distribution of bins or you choose bad no. of bins (Distribution of bins is not easy)
+	(aims at approximating the distribution function (probability density) of the continuous data)
+	Barplot - nice representation and widely used; easy to compare multiple varibales or data sources ((multivariate data)) on same figure
+	(like histograms, aims at approximating the distribution function (probability density) of the continuous data)
+	(Quartile representation of dataset with outliers)
+	(If plotting for multiple variables or different groups within the same figure, MAKE SURE THAT THE SCALE or UNIT for all (on x-axis and y-axis) is same for all, otherwise if the scale is not same, then we may need to plot them in separate figures)
+2. Discrete Data
+	Numerical indicator: Frequency of each value
+	Graphical tools: barplot, pie-plot, pair plot
+3. Multivariate Data (Not simple and could be complicated to represent data because of mixed type)
+	Numerical Indicators:
+		Mean vector
+		Covariance matrix (difficult to read)
+		
+			example: X={x1,x2,...,xn} and xi belongs to R^P
+				Mean vector => x bar = (x bar(1), x bar(2), ...., x bar(P)) where x bar(j) = 1/N (Sigma i=1 to N) xi(j) for j = 1 to P
+				(X is a big matrix with N rows of data and P columns of different variables)
+				(Mean vector -> mean of each column is calculated)
+				Variance matrix =>
+					sigma1^2		sigma1sigma2	sigma1sigma3
+					sigma2sigma1	sigma2^2		sigma2sigma3
+					.
+					.
+					sigmapsigma1	sigmapsigma2	sigmap^2
+		Corelation matrix:
+			(The corelation coefficients Cij = Cji (for i equal to j) is always 1 because the variables are the same)
+			(The corelation coefficients Cij = Cji (for i not equal to j i.e. different variables) belongs to [-1,1])
+					1		C12	. . . .	C1j
+					C21		1   . . . . C2j
+					.
+					.
+					Ci1		Ci2 . . . . 1
+			+ve corelation (Cij = 1) (direct relationship between the varibales e.g. salary and tax slab)
+			equality (or neutral) corelation (Cij = 0) (no relationship between the variables e.g. time and tide)
+			-ve corelation (Cij = -1) (inverse relationship between the variables e.g. demand and price of item)	
+	Graphical Tools:
+		Scatter Plot:  It is possible to add up to 2 categorical variables V1 vs V2 on this plot BY VARYING THE FORM AND THE COLOR OF THE POINTS
+			(Different symbols and different colors). It is IMPORTANT to place the legends to distinguish between them
+		Pair plot:
+			can be used for up to 10 to 15 variables (compare 15 varibale at once)
+			allows to visualize the whole p-dimensional space through slices along the varibales
+				V1			V1 vs V2	. . .	V1 VS Vp
+				V2 vs V1	V2			. .	.	V2 VS Vp
+				.			.			. .	.	.
+				.			.			. .	.	.
+				Vp vs V1	Vp vs V2	. .	.	Vp
+				
+				
+Working with 'iris' dataset:
+The iris dataset consists of 4 continuous variables (all measured in centimeters) and 1 categorical variable (with 3 different values)
+# load the iris data
+data(iris)
+# extract the sepal length column and store it in the variable 'X'
+X = iris$Sepal.Length
+# plot the histogram for X
+hist(X)
+By tuning the histogram (by changing no. of breaks i.e. bins), various different conclusions can be deduced out of the result.
+hist(X, breaks=50)
+In breaks, you can also pass/ provide a function to compute the number of cells (no. of bins)
+Various values are accepted for breaks, refer to R help for more details on 'hist'.
+
+# To pot the density distribution in histograms
+hist(X, freq=FALSE)
+lines(density(x),lwd=2,col=2)
+
+#boxplot for X
+boxplot(X)
+#the parameter horizontal=TRUE will display the boxplot horizontally instead of default vertical plot.
+boxplot(X, horizontal=TRUE)
+
+# plot the scatter plot with same color and patch (pattern)
+# select all rows and columns 1 and 2
+plot(iris[,1:2], type='p', col='lavender', pch=19)
+# plot the scatter plot with different colors and different patches (patterns)
+plot(iris[,1:2], type='p', col=as.numeric(iris$Species), pch=as.numeric(iris$Species))
+
+# Multivariate data
+# juxtapose of 4 varibales using barplots; all rows and all columns (continuous) except for the last column (categorical)
+boxplot(iris[,-5])
+# juxtapose of same 4 variables using histograms
+par(mfrow=c(2,2))
+for (i in 1:4) hist(iris[,i])
+
+Notice that the bin size is different for all the 4 histograms generated for these 4 varibales and thus their comparision becomes quite difficult. For this reason, boxplots are usually preferred by data scientists.
+
+# pair plot
+pairs(iris[,-5])
+pairs(iris[,-5], col=as.numeric(iris$Species))
+# the 'legend' function helps in putting the legends on the plotted graph
+legend("bottomright",legend = c("Versicolor","Setosa","Virginica"),col=1:3,pch=19)
+
+
+# Multivariate numerical indicators
+# To compute mean of a particular variable
+m = mean(iris$sepal.length)
+m
+
+# To compute the mean of all columns (continuous variables only)
+mu = colMeans(iris[,-5])
+mu
+
+# To compute the variances using covariance matrix
+V = var(iris[,-5])
+
+# To compute the correlation matrix
+C = cor(iris[,-5])
+
+
+Covariance matrix is useful in computation of many multi-dimensional distributions like gaussian, student, etc.
+Covariance matrix is not useful for comparision of various variables, instead correlation matrix is useful. 
+
+-----------------------------------------------------
+The learning process: One task, several families of approaches (means to do a task, many approaches are available):
+- Statistical learning: from a given data, build multiple categorical dataset over several stages and predict the outcome
+	(from the given data set, we want to learn something useful and meaningful)
+	X -> M at theta hat at X -> f(x*) at theta hat at X = y hat*
+	(develop a model M which is parameterized and estimated from X)
+	(use a predictor function parameterized and estimated from X on some new data to predict the outsome)
+	
+	Example: From a given data set of patients, build a model to group them into two separate entities based upon whether they are infected with a particular virus or not. From this new data set, build a classifier f to predict whether a newly added patient belongs to group 1 or group 2.
+	
+- Machine learning: based on optimization -> less theory, more computation
+	X -> f hat (x*) at X = y hat* 
+	(There is no model involved to build the predictor. ALso the predictor function f is NOT parameterized, instead it is estimated directly from the given data set. When you have a new data x*, you can do the prediction y* using this predictor function.)
+	
+- Deep learning: a subset of machine learning
+	X -> f hat at X -> f hat (x*) at X = y hat*
+	(f is a complex function with network of linear or non-linear computations)
+	(useful for large datasets)
+	(usually f is same as that of machine learning but is more complex in terms of computations or network of data)
+	
+Supervised vs Unsupervised learning
+			Supervised														Unsupervised
+-----------------------------------------------------------------------------------------------------------------
+	The goal is to learn from the data							The goal is to learn from the data some new
+	to be able to predict for future values.					characteristics that help to understand the
+																phenomenon that generated the data.
+	X: observed data, Y: target data for classification			(You have some data and you just want to analyse that for traits.)
+		(X,Y) -> f hat (x*) at X,Y = y hat*						We have a data X. We come up with some operator function f
+																that allows us to understand the data. We apply the operator to
+																the original data X and not on some new data to get a new trait
+																or description of the data.
+																(X) -> f hat (X) at X = y hat
+					
+	Example: Let X be no. of customers associated with a bank	Example: You have some high-dimensional continuous data which you need to 
+		and Y be a classifier whether there is a problem with		analyse to extract some knowledge on the data. Manual analysis migh be
+		loan account or not. A client visits to apply for a			time consuming and non-efficient. We can come up with a model or  
+		loan for 15 years. The predictor will compute the risk		operator that would reduce the dimension to say 2. Now, extraction
+		of providing the loan to the client after doing some		of information becomes easy.
+		future predictions.
+																Example: You have some categorical data X and you want to cluster them into
+																	different groups based upon some traits.
+	
+	Intervention of HUMAN										NO HUMAN Interference 
+	(X is the data, Y is the input from human)					(X is the data to be analysed)										
+																
+	Classification												Clustering
+	e.g predict a disease										e.g. discover a group of patients	
+	or distiction between several datasets						Dimensionality reduction
+	Regression													e.g. provide a low dimensional visualization of the data
+	e.g. predict the price of a house								(These two tasks are the most important ones in data science and cover
+	Time-series forecasting or analysis								up almost 98% of the unsupervised tasks in deep/ machine learning)
+	e.g. pollution level today and tomorrow
+	or rainfall tomorrow or a day after
+	or weather tomorrow and later days
+	
+	CART, Random Forest - Supervised learning techniques
+	for Regression and Classification
+	
+Example:
+	Classification (X being the explanatory varibale with so much data to be analysed, Y being the target variable which is to be computed based upon the analysis)
+	(X,Y) -> f hat at X,Y: X is the explanatory variables, Y is the target variable which is CATEGORICAL
+	Regression
+	(X,Y) -> f hat at X,Y: X is the explanatory variables, Y is the target variable which is CONTINUOUS
+	Time-series analysis
+	(X,T) we want to predict f hat(t*) at X,T = x hat*
+	(Based on the observations of X and data available over time t, we want to predict future data say at time t+4)
+
+****************************
+SUPERVISED LEARNING PROCESS:
+****************************
+MEASURING THE LEARNING PERFORMANCE:
+-> You should a have a good VFX or GPU to analyze the data as the data can be too large to be processed.
+
+We have a set of complete data (X,Y) (X: explanatory variable; Y: target variable)
+-> The goal is to come up with a predictor function f from the provided data set.
+Step 1: Learning
+Step 2: Prediction
+
+	(X,Y) --- Learning --> predictor f hat --- Prediction --> outcome based upon new data
+
+-> One comfortable thing of working in the supervised context is to be able to measure the performance of the learned predictor. e.g. learning error can be computed during each stage.
+	f hat at X,Y => Learning Error = sigma over i (yi - f hat(xi) at X,Y)^2
+-> compare several predictors and pick the most efficient one.
+	(Build the predictors f hat, g hat, h hat and compute the learning errors for all TO MEASURE THE PERFORMANCE. Pick the model with the best performance.)
+	(HOW TO MEASURE THE PERFORMANCE - Cross validation: Split your data set in two groups: the training set and the test set)
+	
+This error is too optimistic and NOT REALISTIC at all.
+Example:
+	Case 1: Preparation for an entrance exam and making a list of only important questions out of it and keep revising the same to minimize the risk of failing in the exam. This is too optimistic as the reality would change based upon the questions asked in the real exam.
+	Case 1: You are preparing for an exam and your teacher gives you the answers to the questions SUPPOSED to be asked in the actual exam. You keep revising the same set of questions. You may either end up with very high grades if almost all the questions appear from the sample set, or average grades if some of the questions are from the sample set, or very low grades if very few or none of the questions are asked from the sample set => The result of getting high grades is TOO OPTIMISTIC.
+	Case 3: Preparation for an entrance exam with the help of some sample papers generated out of the previous exams. The learning error i.e. if the sample papers are covered well, chances of failure becomes low. This obviously is too realistic based upon how well you do in your exam.
+
+To cover up, we can come up with a MINIMAL SETUP for building a supervised predictor from data as follows:
+
+We divide the data set in two chunks - Major data set does the learning and small data set does the validation of the prediction
+............  ...
+.          .  . .    (1) LEARNING  f hat at (X at L,Y at L)
+.          .  . .			(Learn the predictor f from the 80% of data set X,Y to build a computing model for Y)
+............  ...
+.          .  . .    (2) VALIDATION f hat (X at V) at (X at L,Y at L) = y  at V => E at f
+............  ...			(Apply the predictor on the rest 20% data set X (left for validation) to predict Y. Finally, compute
+							the error from this)
+
+
+The data might be good but still can be made better => "RESAMPLING TECHNIQUES" inspired from statistics.
+We apply some resampling techniques to the data collected after last step - Leave-one-out, V-fold cross-validation, bootstrap, etc. - depending on the context (sample size, computing time, dimension, ...)
+
+------------------------------
+LEAVE-ONE-OUT: Leave one individual at a time and do the computation with the rest.
+.........   .........	.........				.........
+.       .   .		.	.		.				.........
+.       .   .		.	.		.				.		.
+.       .   .		.	.		.				.		.
+.       .   .		.	.		.				.		.
+.       .   .		.	.		.				.		.
+.       .   .		.	.		.				.		.
+.       .	.		.	.		.				.		.
+.       .	.		.	.........				.		.
+.       .	.........	.........				.		.
+.........	.........	.		.				.		.
+.........	.........	.........				.........
+
+f1 -> E1	f2 -> E2	f3 -> E3				fN -> EN		->		mean(E)
+
+Step 1: Take last data sample for validation and rest N-1 data samples for learning. Predict the model and compute the error.
+Step 2: Take second last data sample for validation and rest N-1 samples for learning. Predict the model and compute the error.
+.
+.
+.
+Step N: Take 1st data sample for validation and rest N-1 samples for learning. Predict the model and compute the error.
+Final step: 
+
+Finally, we compute the empirical mean of the newly generated data set of 'errors' E1, E2, .... , EN to get a best value (REALISTIC). If N is large, we can compute the confidence interval for the error of f.
+-> We can predict the behaviour of any future data added to this data set.
+-> We can compute the expected value of the error.
+-> We can also compute the variance of the error.
+
+CONS 
+- could be very slow if the data is too large or N is too large (a million or billion)
+
+-------------------------------
+V-FOLD CROSS-VALIDATION:
+
+We divide the dataset N in V equal parts (N/V).
+E1, E2, ...., EV (and not EN) and then compute empirical mean E bar.
+Here, we pick V large enough but also feasibly such that the process can be done in a fixed time.
+
+(You vary V and do the computations -> V has to be chosen wisely)
+-------------------------------
+BOOTSTRAP: useful when you have very low data available (say 50) i.e. when N is not too large enough.
+Sampling with replacement - We randomly select the learning data (L) and the validation data (V). We then apply sampling methods to compute the error. We repeat this process several times with new random data set (L,V) and then finally compute the empirical mean of all the errors.
+
+The problem of overfitting:
+	In most of the learning techniques, f are parameterized (say f at lambda). In ML, DL, SL, and other such fields, the tuning of these parameters is usually done based on estimated errors.
+	(Usually, lambda is tuned parameter which can not be estimated from the given data)
+
+
+*******************
+Linear Regression:
+*******************
+f(X,Y)	->	Beta * X + epsilon, which is distributed in gaussion
+Y is continuous variable
+Beta is the statistical model
+
+Y = beta X + epsilon
+Here we need to calculate 'Beta'.
+Beta hat = (X transpose X)inverse  * X transpose * Y    => Learning step in Linear Regression
+Y hat* = Beta hat * x*    => Prediction step in Linear Regression
+
+
+
+.......................................................................
+# Learing model implementation in R
+## In R, the linear model is made available with the lm() function
+x = runif(100,0,10)    	# Uniform data set with 100 samples between 0 and 10
+eps = rnorm(100,0,0.3)	# Gaussian data set with 100 samples between 0 and 0.3. Increase 0.3 to observe the difference.
+y = 0.5 * x - 1.2 * x^2 + 0.1 * x^3 + eps
+plot(x,y,type='p',pch=19)
+
+# Learning step
+f = lm(y ~ x)
+f
+plot(x,y,type='p')		# Scatter plot of model f
+abline(f)				# Regression line of f
+
+# Predict for some data (here the learing data again)
+yhat = predict(f, newdata=as.data.frame(x))
+yhat
+plot(y, yhat, type='p')
+
+# Learning error for the model f
+errL = sum((y - yhat)^2) / length(yhat)
+errL
+
+- - - - - - - - - - - - - - - - -
+# Let's now use the minimal setup to estimate the error of f:
+# Split between training and validation
+val = sample(1:100,25)		# sample set for validation
+
+#Learning step
+f2 = lm(y[-val] ~ x[-val])	# compute the model on all the samples which are not in validation
+plot(x,y,type='p')
+abline(f)
+abline(f2, col='red')
+
+# Predict for some data (here the learning data again)
+yhat = predict(f2, newdata = as.data.frame(x[val]))
+
+# Validation Error
+errV = sum((y[val] - yhat)^2) / length(yhat)
+errV
+- - - - - - - - - - - - - - - - -
+# Another way
+train = sample(1:100,75)			# we reserve 75% of sample data for training or learning the behaviour
+
+f2 = lm(y ~ x, subset = train)		# we apply the regression model on the training data
+plot(x,y,type='p')					# do the scatter plot
+abline(f)							# plot the original abline function with complete data set 'x'
+abline(f2, col='red')				# plot the new abline function with 75% training data set
+
+xval = data.frame(x = x[-train])	# store the remaining 25% validation sample data in a variable
+yhat = predict(f2, newdata = xval)	# do the prediction
+errV = sum((y[-train] - yhat)^2) / length(yhat)		# compute the validation error from the validation data set
+errV
